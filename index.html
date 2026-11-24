@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="theme-color" content="#080a0e" />
   <link rel="manifest" href="manifest.json" />
-  <title>PulseBeat DJ Pro v0.04 — BEAT-IT + Pioneer + VirtualDJ PWA</title>
+  <title>PulseBeat DJ Pro v0.05 — BEAT-IT Web Console PWA</title>
   <style>
     :root {
       --bg: #080a0e;
@@ -84,8 +84,8 @@
     .splash-sub {
       font-size: 0.8rem;
       color: var(--muted);
-      max-width: 360px;
-      line-height: 1.45;
+      max-width: 390px;
+      line-height: 1.5;
       margin: 0;
     }
 
@@ -225,8 +225,9 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
       margin-bottom: 6px;
+      flex-wrap: wrap;
     }
 
     .deck-title {
@@ -237,6 +238,30 @@
     .deck-a .deck-title { color: var(--accent-a); }
     .deck-b .deck-title { color: var(--accent-b); }
 
+    .bpm-cluster {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .beat-led {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #283246;
+      transition: transform 0.06s ease, background 0.06s ease;
+    }
+    .deck-a .beat-led.flash {
+      background: var(--accent-a);
+      box-shadow: 0 0 8px var(--accent-a);
+      transform: scale(1.25);
+    }
+    .deck-b .beat-led.flash {
+      background: var(--accent-b);
+      box-shadow: 0 0 8px var(--accent-b);
+      transform: scale(1.25);
+    }
+
     .bpm-readout {
       display: flex;
       align-items: center;
@@ -245,11 +270,18 @@
       border: 1px solid var(--border);
       padding: 3px 7px;
       border-radius: 7px;
-      font-size: 0.72rem;
+      font-size: 0.7rem;
       font-weight: 800;
     }
     .deck-a .bpm-val { color: var(--accent-a); }
     .deck-b .bpm-val { color: var(--accent-b); }
+
+    .btn-tap {
+      padding: 3px 6px;
+      font-size: 0.62rem;
+      border-radius: 6px;
+      color: var(--muted);
+    }
 
     .track-name {
       font-size: 0.74rem;
@@ -285,9 +317,9 @@
       position: absolute;
       bottom: 2px;
       right: 5px;
-      font-size: 0.62rem;
+      font-size: 0.6rem;
       font-family: monospace;
-      background: rgba(8, 10, 14, 0.8);
+      background: rgba(8, 10, 14, 0.82);
       padding: 1px 4px;
       border-radius: 4px;
       color: var(--text);
@@ -382,7 +414,19 @@
       display: flex;
       flex-direction: column;
       gap: 5px;
-      min-width: 78px;
+      min-width: 82px;
+    }
+
+    .nudge-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px;
+    }
+
+    .btn-nudge {
+      padding: 4px;
+      font-size: 0.68rem;
+      color: var(--text);
     }
 
     .btn-sync {
@@ -740,7 +784,8 @@
     </svg>
     <h1 class="splash-title">PULSEBEAT DJ PRO</h1>
     <p class="splash-sub">
-      Pioneer + VirtualDJ + BEAT-IT Web Console • <strong>v0.04</strong><br/>
+      BEAT-IT Web Console • <strong>v0.05</strong><br/>
+      <em style="color: #eef2f7;">"Keeping the King of Pop's timeless rhythm alive—feel the beat, own the groove."</em><br/>
       100% Free Offline PWA • Dual Deck • Auto-BPM • 8-Pad Sampler
     </p>
     <button class="btn-enter" id="enterBoothBtn">ENTER DJ BOOTH</button>
@@ -754,7 +799,7 @@
         <circle cx="32" cy="32" r="7" fill="#ff2e63"/>
       </svg>
       <span>PULSEBEAT DJ PRO</span>
-      <span class="badge">v0.04</span>
+      <span class="badge">v0.05</span>
     </div>
     <div class="topbar-right">
       <button id="installBtn" class="btn-install">Install App</button>
@@ -773,9 +818,13 @@
     <section class="deck deck-a" id="deckA">
       <div class="deck-header">
         <span class="deck-title">DECK A</span>
-        <div class="bpm-readout">
-          <span>BPM</span>
-          <span class="bpm-val" id="bpmDispA">--.-</span>
+        <div class="bpm-cluster">
+          <span class="beat-led" id="beatLedA"></span>
+          <div class="bpm-readout">
+            <span>BPM</span>
+            <span class="bpm-val" id="bpmDispA">--.-</span>
+          </div>
+          <button class="btn-tap" id="tapBpmA" title="Tap repeatedly to set BPM">TAP</button>
         </div>
         <button class="btn-load" onclick="document.getElementById('fileA').click()">Load</button>
         <input type="file" id="fileA" class="hidden-file" accept="audio/*" />
@@ -785,7 +834,7 @@
 
       <div class="waveform-box" id="waveBoxA" title="Tap to seek">
         <canvas class="waveform" id="waveA"></canvas>
-        <span class="time-overlay" id="timeA">00:00 / 00:00</span>
+        <span class="time-overlay" id="timeA">00:00 / -00:00</span>
       </div>
 
       <div class="hotcue-bar">
@@ -806,6 +855,10 @@
         </div>
         <div class="sync-stack">
           <button class="btn-sync" id="syncA" title="Shortcut [E]">SYNC B [E]</button>
+          <div class="nudge-row">
+            <button class="btn-nudge" id="nudgeBackA" title="Nudge -40ms">[</button>
+            <button class="btn-nudge" id="nudgeFwdA" title="Nudge +40ms">]</button>
+          </div>
           <button class="btn-pfl" id="pflA">CUE A</button>
         </div>
       </div>
@@ -905,9 +958,13 @@
     <section class="deck deck-b" id="deckB">
       <div class="deck-header">
         <span class="deck-title">DECK B</span>
-        <div class="bpm-readout">
-          <span>BPM</span>
-          <span class="bpm-val" id="bpmDispB">--.-</span>
+        <div class="bpm-cluster">
+          <span class="beat-led" id="beatLedB"></span>
+          <div class="bpm-readout">
+            <span>BPM</span>
+            <span class="bpm-val" id="bpmDispB">--.-</span>
+          </div>
+          <button class="btn-tap" id="tapBpmB" title="Tap repeatedly to set BPM">TAP</button>
         </div>
         <button class="btn-load" onclick="document.getElementById('fileB').click()">Load</button>
         <input type="file" id="fileB" class="hidden-file" accept="audio/*" />
@@ -917,7 +974,7 @@
 
       <div class="waveform-box" id="waveBoxB" title="Tap to seek">
         <canvas class="waveform" id="waveB"></canvas>
-        <span class="time-overlay" id="timeB">00:00 / 00:00</span>
+        <span class="time-overlay" id="timeB">00:00 / -00:00</span>
       </div>
 
       <div class="hotcue-bar">
@@ -938,6 +995,10 @@
         </div>
         <div class="sync-stack">
           <button class="btn-sync" id="syncB" title="Shortcut [O]">SYNC A [O]</button>
+          <div class="nudge-row">
+            <button class="btn-nudge" id="nudgeBackB" title="Nudge -40ms">;</button>
+            <button class="btn-nudge" id="nudgeFwdB" title="Nudge +40ms">'</button>
+          </div>
           <button class="btn-pfl" id="pflB">CUE B</button>
         </div>
       </div>
@@ -1001,7 +1062,7 @@
   <section class="sampler-box">
     <div class="sampler-header">
       <span class="sampler-title">BEAT-IT SAMPLER (8 PADS)</span>
-      <span style="font-size: 0.65rem; color: var(--muted);">Pads [1–8] • Deck A [Q/W/E/R] • Deck B [U/I/O/P] • Fade [Space]</span>
+      <span style="font-size: 0.65rem; color: var(--muted);">Pads [1–8] • A [Q/W/E/R + [/]] • B [U/I/O/P + ;/'] • Fade [Space]</span>
     </div>
     <div class="pads-grid" id="padsGrid"></div>
   </section>
@@ -1013,13 +1074,11 @@
       });
     }
 
-    // Splash screen entry
     document.getElementById('enterBoothBtn').addEventListener('click', () => {
       initAudio();
       document.getElementById('splashScreen').classList.add('hidden');
     });
 
-    // PWA Install
     let deferredPrompt = null;
     const installBtn = document.getElementById('installBtn');
     window.addEventListener('beforeinstallprompt', (e) => {
@@ -1035,7 +1094,6 @@
       installBtn.style.display = 'none';
     });
 
-    // Fullscreen Toggle
     const fsBtn = document.getElementById('fsBtn');
     fsBtn.addEventListener('click', async () => {
       try {
@@ -1051,7 +1109,6 @@
       } catch (_) {}
     });
 
-    // Screen Wake Lock
     let wakeLock = null;
     const wakeBtn = document.getElementById('wakeBtn');
     wakeBtn.addEventListener('click', async () => {
@@ -1109,7 +1166,7 @@
         ctx.resume();
       }
       document.getElementById('audioDot').classList.add('active');
-      document.getElementById('audioStatus').textContent = 'v0.04 Live';
+      document.getElementById('audioStatus').textContent = 'v0.05 Live';
     }
 
     function connectOutputRouting() {
@@ -1140,7 +1197,6 @@
 
     document.getElementById('stopAllBtn').addEventListener('click', stopAllDecks);
 
-    // Master Recorder
     document.getElementById('recBtn').addEventListener('click', () => {
       initAudio();
       const btn = document.getElementById('recBtn');
@@ -1161,7 +1217,7 @@
           const url = URL.createObjectURL(blob);
           const a = document.createElement('a');
           a.href = url;
-          a.download = `PulseBeat_v0.04_Mix_${Date.now()}.webm`;
+          a.download = `PulseBeat_v0.05_Mix_${Date.now()}.webm`;
           a.click();
           status.textContent = 'Saved (.webm)!';
         };
@@ -1273,6 +1329,8 @@
         this.sourceConnected = false;
 
         this.baseBPM = null;
+        this.tapTimes = [];
+        this.lastBeatStep = -1;
         this.peaks = [];
         this.hotCues = [null, null, null, null];
         this.loopActive = false;
@@ -1300,6 +1358,49 @@
         this.audio.addEventListener('ended', () => {
           this.playNextInQueue();
         });
+      }
+
+      tapBPM() {
+        const now = performance.now();
+        if (this.tapTimes.length > 0 && now - this.tapTimes[this.tapTimes.length - 1] > 2200) {
+          this.tapTimes = [];
+        }
+        this.tapTimes.push(now);
+        if (this.tapTimes.length > 6) this.tapTimes.shift();
+
+        if (this.tapTimes.length >= 2) {
+          let totalInterval = 0;
+          for (let i = 1; i < this.tapTimes.length; i++) {
+            totalInterval += (this.tapTimes[i] - this.tapTimes[i - 1]);
+          }
+          const avgMs = totalInterval / (this.tapTimes.length - 1);
+          const tappedEffBpm = 60000 / avgMs;
+          const tempo = parseFloat(document.getElementById(`tempo${this.id}`).value);
+          this.baseBPM = Math.max(50, Math.min(220, tappedEffBpm / tempo));
+          this.syncControls();
+        }
+      }
+
+      nudge(deltaSec) {
+        this.ensureGraph();
+        if (!this.audio.src || !isFinite(this.audio.duration)) return;
+        this.audio.currentTime = Math.max(0, Math.min(this.audio.duration, this.audio.currentTime + deltaSec));
+      }
+
+      updateBeatPulse() {
+        const led = document.getElementById(`beatLed${this.id}`);
+        const effBpm = this.getEffectiveBPM();
+        if (this.audio.paused || !effBpm || effBpm <= 0) {
+          led.classList.remove('flash');
+          return;
+        }
+        const beatSec = 60 / effBpm;
+        const beatIndex = Math.floor(this.audio.currentTime / beatSec);
+        if (beatIndex !== this.lastBeatStep) {
+          this.lastBeatStep = beatIndex;
+          led.classList.add('flash');
+          setTimeout(() => led.classList.remove('flash'), 85);
+        }
       }
 
       ensureGraph() {
@@ -1410,6 +1511,7 @@
         this.ensureGraph();
         this.audio.src = URL.createObjectURL(file);
         this.cueTime = 0;
+        this.lastBeatStep = -1;
         this.hotCues = [null, null, null, null];
         this.loopActive = false;
         document.getElementById(`loop${this.id}`).classList.remove('active');
@@ -1460,6 +1562,7 @@
 
         const duration = this.audio.duration || 0;
         const current = this.audio.currentTime || 0;
+        const remaining = duration > 0 ? Math.max(0, duration - current) : 0;
         const progress = duration > 0 ? current / duration : 0;
 
         if (this.peaks.length > 0) {
@@ -1498,7 +1601,7 @@
           c.fillRect(px - 1, 0, 2, h);
         }
 
-        document.getElementById(`time${this.id}`).textContent = `${formatTime(current)} / ${formatTime(duration)}`;
+        document.getElementById(`time${this.id}`).textContent = `${formatTime(current)} / -${formatTime(remaining)}`;
       }
 
       handleHotCue(index) {
@@ -1661,13 +1764,11 @@
       if (deckB.xfadeGain) deckB.xfadeGain.gain.value = Math.cos((1 - x) * 0.5 * Math.PI);
     }
 
-    // Custom Fade Duration Slider
     const fadeDurSlider = document.getElementById('fadeDurSlider');
     fadeDurSlider.addEventListener('input', (e) => {
       document.getElementById('fadeDurVal').textContent = `${parseFloat(e.target.value).toFixed(1)}s`;
     });
 
-    // AUTO-FADE Transition
     let fading = false;
     function triggerAutoFade() {
       initAudio();
@@ -1722,6 +1823,9 @@
       document.getElementById(`sync${id}`).addEventListener('click', () => deck.syncTo(otherDeck));
       document.getElementById(`loop${id}`).addEventListener('click', () => deck.toggleLoop());
       document.getElementById(`pfl${id}`).addEventListener('click', () => deck.togglePfl());
+      document.getElementById(`tapBpm${id}`).addEventListener('click', () => deck.tapBPM());
+      document.getElementById(`nudgeBack${id}`).addEventListener('click', () => deck.nudge(-0.04));
+      document.getElementById(`nudgeFwd${id}`).addEventListener('click', () => deck.nudge(0.04));
 
       document.getElementById(`waveBox${id}`).addEventListener('click', (e) => {
         deck.ensureGraph();
@@ -1812,6 +1916,7 @@
         if (d.loopActive && d.audio.currentTime >= d.loopEnd) {
           d.audio.currentTime = d.loopStart;
         }
+        d.updateBeatPulse();
         d.drawWaveform();
       });
       requestAnimationFrame(renderLoop);
@@ -1837,7 +1942,6 @@
       tick();
     }
 
-    // BEAT-IT 8-Pad Sampler
     const padPresets = [
       { label: 'SUB DROP', type: 'sub', key: '1' },
       { label: 'LASER ZAP', type: 'laser', key: '2' },
@@ -1960,33 +2064,32 @@
       });
     });
 
-    // Global Keyboard Shortcuts
     window.addEventListener('keydown', (e) => {
       if (e.repeat) return;
       if (['INPUT', 'SELECT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
 
       const k = e.key.toLowerCase();
 
-      // BEAT-IT Pads [1-8]
       const padIdx = padPresets.findIndex((p) => p.key === e.key);
       if (padIdx !== -1) {
         triggerPad(padIdx);
         return;
       }
 
-      // Deck A Shortcuts
       if (k === 'q') deckA.togglePlay();
       else if (k === 'w') deckA.cue();
       else if (k === 'e') deckA.syncTo(deckB);
       else if (k === 'r') deckA.toggleLoop();
+      else if (e.key === '[') deckA.nudge(-0.04);
+      else if (e.key === ']') deckA.nudge(0.04);
 
-      // Deck B Shortcuts
       else if (k === 'u') deckB.togglePlay();
       else if (k === 'i') deckB.cue();
       else if (k === 'o') deckB.syncTo(deckA);
       else if (k === 'p') deckB.toggleLoop();
+      else if (e.key === ';') deckB.nudge(-0.04);
+      else if (e.key === "'") deckB.nudge(0.04);
 
-      // Crossfader & Mixer Shortcuts
       else if (e.key === 'ArrowLeft') {
         e.preventDefault();
         initAudio();

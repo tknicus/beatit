@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pulsebeat-dj-v0.04';
+const CACHE_NAME = 'pulsebeat-dj-v0.05';
 const ASSETS = [
   './',
   './index.html',
