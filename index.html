@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="theme-color" content="#080a0e" />
   <link rel="manifest" href="manifest.json" />
-  <title>PulseBeat DJ Pro V4 — BEAT-IT + Pioneer + VirtualDJ PWA</title>
+  <title>PulseBeat DJ Pro v0.04 — BEAT-IT + Pioneer + VirtualDJ PWA</title>
   <style>
     :root {
       --bg: #080a0e;
@@ -38,6 +38,70 @@
       min-height: 100dvh;
     }
 
+    /* SPLASH SCREEN */
+    .splash-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: radial-gradient(circle at center, #162033 0%, #07090d 75%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      padding: 20px;
+      text-align: center;
+      transition: opacity 0.35s ease, visibility 0.35s ease;
+    }
+
+    .splash-overlay.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .splash-logo {
+      width: 112px;
+      height: 112px;
+      animation: spinSlow 9s linear infinite;
+    }
+
+    @keyframes spinSlow {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .splash-title {
+      font-size: 1.55rem;
+      font-weight: 900;
+      letter-spacing: 1.5px;
+      background: linear-gradient(90deg, var(--accent-a), #ffffff, var(--accent-b));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin: 0;
+    }
+
+    .splash-sub {
+      font-size: 0.8rem;
+      color: var(--muted);
+      max-width: 360px;
+      line-height: 1.45;
+      margin: 0;
+    }
+
+    .btn-enter {
+      margin-top: 6px;
+      padding: 12px 26px;
+      font-size: 0.9rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--accent-a), #0095ff);
+      color: #05080d;
+      border: none;
+      box-shadow: 0 0 22px rgba(0, 210, 255, 0.45);
+    }
+
     .topbar {
       display: flex;
       flex-wrap: wrap;
@@ -47,7 +111,7 @@
       background: var(--panel);
       border: 1px solid var(--border);
       border-radius: 10px;
-      padding: 7px 12px;
+      padding: 6px 12px;
       margin-bottom: 8px;
     }
 
@@ -58,6 +122,12 @@
       font-weight: 800;
       letter-spacing: 0.5px;
       font-size: 0.9rem;
+    }
+
+    .brand-icon {
+      width: 22px;
+      height: 22px;
+      flex-shrink: 0;
     }
 
     .badge {
@@ -416,7 +486,6 @@
       border-top: 1px solid var(--border);
     }
 
-    /* QUEUE BOX PER DECK */
     .queue-box {
       margin-top: 6px;
       padding-top: 6px;
@@ -499,6 +568,7 @@
       color: var(--accent-a);
       font-size: 0.7rem;
       padding: 6px;
+      margin-bottom: 5px;
     }
 
     .btn-rec {
@@ -617,7 +687,7 @@
         margin-bottom: 4px;
       }
       .console-grid {
-        grid-template-columns: 1fr 190px 1fr;
+        grid-template-columns: 1fr 195px 1fr;
         gap: 5px;
       }
       .deck, .mixer, .sampler-box {
@@ -658,19 +728,42 @@
   </style>
 </head>
 <body>
+  <!-- BRAND SPLASH SCREEN -->
+  <div class="splash-overlay" id="splashScreen">
+    <svg class="splash-logo" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="60" cy="60" r="54" fill="#0d121c" stroke="#00d2ff" stroke-width="4" />
+      <circle cx="60" cy="60" r="42" stroke="#1e293b" stroke-width="2" stroke-dasharray="6 4" />
+      <circle cx="60" cy="60" r="30" stroke="#ff7b00" stroke-width="3" />
+      <circle cx="60" cy="60" r="14" fill="#ff2e63" />
+      <circle cx="60" cy="60" r="4" fill="#080a0e" />
+      <path d="M60 6V20" stroke="#00d2ff" stroke-width="4" stroke-linecap="round" />
+    </svg>
+    <h1 class="splash-title">PULSEBEAT DJ PRO</h1>
+    <p class="splash-sub">
+      Pioneer + VirtualDJ + BEAT-IT Web Console • <strong>v0.04</strong><br/>
+      100% Free Offline PWA • Dual Deck • Auto-BPM • 8-Pad Sampler
+    </p>
+    <button class="btn-enter" id="enterBoothBtn">ENTER DJ BOOTH</button>
+  </div>
+
   <div class="topbar">
     <div class="brand">
+      <svg class="brand-icon" viewBox="0 0 64 64" fill="none">
+        <circle cx="32" cy="32" r="28" fill="#0d121c" stroke="#00d2ff" stroke-width="4"/>
+        <circle cx="32" cy="32" r="16" stroke="#ff7b00" stroke-width="3"/>
+        <circle cx="32" cy="32" r="7" fill="#ff2e63"/>
+      </svg>
       <span>PULSEBEAT DJ PRO</span>
-      <span class="badge">V4 • BEAT-IT 8-PAD</span>
+      <span class="badge">v0.04</span>
     </div>
     <div class="topbar-right">
       <button id="installBtn" class="btn-install">Install App</button>
       <button id="wakeBtn" class="btn-top" title="Keep screen awake">Screen: Normal</button>
       <button id="fsBtn" class="btn-top" title="Toggle Fullscreen">Fullscreen</button>
-      <button id="stopAllBtn" class="btn-stop-all" title="Stop all decks immediately">■ STOP ALL</button>
+      <button id="stopAllBtn" class="btn-stop-all" title="Stop all decks immediately [Esc]">■ STOP ALL</button>
       <div class="status-pill">
         <span id="audioDot" class="dot"></span>
-        <span id="audioStatus">Tap to start Audio</span>
+        <span id="audioStatus">Ready</span>
       </div>
     </div>
   </div>
@@ -700,7 +793,7 @@
         <button class="btn-hotcue" id="hcA1">HC 2</button>
         <button class="btn-hotcue" id="hcA2">HC 3</button>
         <button class="btn-hotcue" id="hcA3">HC 4</button>
-        <button class="btn-loop" id="loopA">4B LOOP</button>
+        <button class="btn-loop" id="loopA" title="Shortcut [R]">4B LOOP</button>
       </div>
 
       <div class="jog-row">
@@ -712,14 +805,14 @@
           </div>
         </div>
         <div class="sync-stack">
-          <button class="btn-sync" id="syncA">SYNC B</button>
+          <button class="btn-sync" id="syncA" title="Shortcut [E]">SYNC B [E]</button>
           <button class="btn-pfl" id="pflA">CUE A</button>
         </div>
       </div>
 
       <div class="transport">
-        <button class="btn-play" id="playA">PLAY</button>
-        <button class="btn-cue" id="cueA">CUE</button>
+        <button class="btn-play" id="playA" title="Shortcut [Q]">PLAY [Q]</button>
+        <button class="btn-cue" id="cueA" title="Shortcut [W]">CUE [W]</button>
         <button id="stopA">STOP</button>
       </div>
 
@@ -786,13 +879,14 @@
       </div>
 
       <div class="crossfader-box">
-        <div class="crossfader-labels"><span>A</span><span>CROSSFADER</span><span>B</span></div>
+        <div class="crossfader-labels"><span>A</span><span>CROSSFADER [←/→]</span><span>B</span></div>
         <input type="range" id="crossfader" min="0" max="1" step="0.01" value="0.5" />
       </div>
 
       <div class="autofade-box">
-        <button class="btn-autofade" id="autoFadeBtn">⚡ AUTO-FADE (A ↔ B)</button>
-        <div id="fadeStatus" style="font-size:0.62rem; color:var(--muted); text-align:center; margin-top:3px;">2.5s smooth transition</div>
+        <button class="btn-autofade" id="autoFadeBtn" title="Shortcut [Space]">⚡ AUTO-FADE [SPACE]</button>
+        <div class="control-label"><span>Fade Duration</span><span id="fadeDurVal">2.5s</span></div>
+        <input type="range" id="fadeDurSlider" min="1" max="10" step="0.5" value="2.5" />
       </div>
 
       <div class="cue-box">
@@ -831,7 +925,7 @@
         <button class="btn-hotcue" id="hcB1">HC 2</button>
         <button class="btn-hotcue" id="hcB2">HC 3</button>
         <button class="btn-hotcue" id="hcB3">HC 4</button>
-        <button class="btn-loop" id="loopB">4B LOOP</button>
+        <button class="btn-loop" id="loopB" title="Shortcut [P]">4B LOOP</button>
       </div>
 
       <div class="jog-row">
@@ -843,14 +937,14 @@
           </div>
         </div>
         <div class="sync-stack">
-          <button class="btn-sync" id="syncB">SYNC A</button>
+          <button class="btn-sync" id="syncB" title="Shortcut [O]">SYNC A [O]</button>
           <button class="btn-pfl" id="pflB">CUE B</button>
         </div>
       </div>
 
       <div class="transport">
-        <button class="btn-play" id="playB">PLAY</button>
-        <button class="btn-cue" id="cueB">CUE</button>
+        <button class="btn-play" id="playB" title="Shortcut [U]">PLAY [U]</button>
+        <button class="btn-cue" id="cueB" title="Shortcut [I]">CUE [I]</button>
         <button id="stopB">STOP</button>
       </div>
 
@@ -907,7 +1001,7 @@
   <section class="sampler-box">
     <div class="sampler-header">
       <span class="sampler-title">BEAT-IT SAMPLER (8 PADS)</span>
-      <span style="font-size: 0.66rem; color: var(--muted);">Keys [1–8] • Custom WAV/MP3 per pad</span>
+      <span style="font-size: 0.65rem; color: var(--muted);">Pads [1–8] • Deck A [Q/W/E/R] • Deck B [U/I/O/P] • Fade [Space]</span>
     </div>
     <div class="pads-grid" id="padsGrid"></div>
   </section>
@@ -918,6 +1012,12 @@
         navigator.serviceWorker.register('./sw.js').catch(() => {});
       });
     }
+
+    // Splash screen entry
+    document.getElementById('enterBoothBtn').addEventListener('click', () => {
+      initAudio();
+      document.getElementById('splashScreen').classList.add('hidden');
+    });
 
     // PWA Install
     let deferredPrompt = null;
@@ -1009,7 +1109,7 @@
         ctx.resume();
       }
       document.getElementById('audioDot').classList.add('active');
-      document.getElementById('audioStatus').textContent = 'Engine Active (V4)';
+      document.getElementById('audioStatus').textContent = 'v0.04 Live';
     }
 
     function connectOutputRouting() {
@@ -1028,8 +1128,7 @@
       }
     }
 
-    // STOP ALL Button
-    document.getElementById('stopAllBtn').addEventListener('click', () => {
+    function stopAllDecks() {
       initAudio();
       [deckA, deckB].forEach((d) => {
         d.stop();
@@ -1037,7 +1136,9 @@
         document.getElementById(`loop${d.id}`).classList.remove('active');
         if (d.echoWet) d.echoWet.gain.setTargetAtTime(0, ctx.currentTime, 0.02);
       });
-    });
+    }
+
+    document.getElementById('stopAllBtn').addEventListener('click', stopAllDecks);
 
     // Master Recorder
     document.getElementById('recBtn').addEventListener('click', () => {
@@ -1060,7 +1161,7 @@
           const url = URL.createObjectURL(blob);
           const a = document.createElement('a');
           a.href = url;
-          a.download = `PulseBeat_V4_Mix_${Date.now()}.webm`;
+          a.download = `PulseBeat_v0.04_Mix_${Date.now()}.webm`;
           a.click();
           status.textContent = 'Saved (.webm)!';
         };
@@ -1156,9 +1257,13 @@
     }
 
     class Deck {
-      constructor(id, colorHex) {
+      constructor(id, colorHex, playKey, cueKey, syncKey) {
         this.id = id;
         this.colorHex = colorHex;
+        this.playKey = playKey;
+        this.cueKey = cueKey;
+        this.syncKey = syncKey;
+
         this.audio = new Audio();
         this.audio.crossOrigin = 'anonymous';
         this.cueTime = 0;
@@ -1192,7 +1297,6 @@
         this.canvas = document.getElementById(`wave${id}`);
         this.cctx = this.canvas.getContext('2d');
 
-        // Auto-advance queue when track finishes
         this.audio.addEventListener('ended', () => {
           this.playNextInQueue();
         });
@@ -1221,7 +1325,6 @@
         this.colorFilter.type = 'allpass';
         this.colorFilter.frequency.value = 1000;
 
-        // BPM-synced Echo
         this.echoDelay = ctx.createDelay(2.0);
         this.echoDelay.delayTime.value = 0.375;
         this.echoFeedback = ctx.createGain();
@@ -1291,7 +1394,7 @@
         if (autoPlay) {
           this.audio.play().catch(() => {});
           const btn = document.getElementById(`play${this.id}`);
-          btn.textContent = 'PAUSE';
+          btn.textContent = `PAUSE [${this.playKey}]`;
           btn.classList.add('playing');
         }
       }
@@ -1467,11 +1570,11 @@
         const btn = document.getElementById(`play${this.id}`);
         if (this.audio.paused) {
           this.audio.play();
-          btn.textContent = 'PAUSE';
+          btn.textContent = `PAUSE [${this.playKey}]`;
           btn.classList.add('playing');
         } else {
           this.audio.pause();
-          btn.textContent = 'PLAY';
+          btn.textContent = `PLAY [${this.playKey}]`;
           btn.classList.remove('playing');
         }
       }
@@ -1480,8 +1583,9 @@
         this.ensureGraph();
         if (!this.audio.src) return;
         this.audio.pause();
-        document.getElementById(`play${this.id}`).textContent = 'PLAY';
-        document.getElementById(`play${this.id}`).classList.remove('playing');
+        const btn = document.getElementById(`play${this.id}`);
+        btn.textContent = `PLAY [${this.playKey}]`;
+        btn.classList.remove('playing');
         this.audio.currentTime = this.cueTime;
       }
 
@@ -1491,7 +1595,7 @@
         this.audio.pause();
         this.audio.currentTime = 0;
         const btn = document.getElementById(`play${this.id}`);
-        btn.textContent = 'PLAY';
+        btn.textContent = `PLAY [${this.playKey}]`;
         btn.classList.remove('playing');
       }
 
@@ -1512,7 +1616,6 @@
         if (this.echoWet) this.echoWet.gain.value = echo;
 
         const effBpm = this.getEffectiveBPM() || 120;
-        // BPM-synced delay time (3/4 beat)
         if (this.echoDelay) {
           const syncedDelay = Math.min(1.8, Math.max(0.08, (60 / effBpm) * 0.75));
           this.echoDelay.delayTime.setTargetAtTime(syncedDelay, ctx ? ctx.currentTime : 0, 0.03);
@@ -1549,8 +1652,8 @@
       }
     }
 
-    const deckA = new Deck('A', '#00d2ff');
-    const deckB = new Deck('B', '#ff7b00');
+    const deckA = new Deck('A', '#00d2ff', 'Q', 'W', 'E');
+    const deckB = new Deck('B', '#ff7b00', 'U', 'I', 'O');
 
     function updateCrossfader() {
       const x = parseFloat(document.getElementById('crossfader').value);
@@ -1558,28 +1661,33 @@
       if (deckB.xfadeGain) deckB.xfadeGain.gain.value = Math.cos((1 - x) * 0.5 * Math.PI);
     }
 
-    // AUTO-FADE Transition between Deck A and Deck B
+    // Custom Fade Duration Slider
+    const fadeDurSlider = document.getElementById('fadeDurSlider');
+    fadeDurSlider.addEventListener('input', (e) => {
+      document.getElementById('fadeDurVal').textContent = `${parseFloat(e.target.value).toFixed(1)}s`;
+    });
+
+    // AUTO-FADE Transition
     let fading = false;
-    document.getElementById('autoFadeBtn').addEventListener('click', () => {
+    function triggerAutoFade() {
       initAudio();
       if (fading) return;
       const xfSlider = document.getElementById('crossfader');
-      const status = document.getElementById('fadeStatus');
+      const btn = document.getElementById('autoFadeBtn');
       const currentX = parseFloat(xfSlider.value);
       const targetX = currentX < 0.5 ? 1 : 0;
       const incomingDeck = targetX === 1 ? deckB : deckA;
+      const durationMs = parseFloat(fadeDurSlider.value) * 1000;
 
-      // Start incoming deck if loaded & paused
       if (incomingDeck.audio.src && incomingDeck.audio.paused) {
         incomingDeck.audio.play().catch(() => {});
         const pBtn = document.getElementById(`play${incomingDeck.id}`);
-        pBtn.textContent = 'PAUSE';
+        pBtn.textContent = `PAUSE [${incomingDeck.playKey}]`;
         pBtn.classList.add('playing');
       }
 
       fading = true;
-      status.textContent = `Fading to Deck ${targetX === 1 ? 'B' : 'A'}...`;
-      const durationMs = 2500;
+      btn.textContent = `FADING → ${targetX === 1 ? 'B' : 'A'}...`;
       const startTime = performance.now();
 
       function stepFade(now) {
@@ -1592,11 +1700,12 @@
           requestAnimationFrame(stepFade);
         } else {
           fading = false;
-          status.textContent = '2.5s smooth transition';
+          btn.textContent = '⚡ AUTO-FADE [SPACE]';
         }
       }
       requestAnimationFrame(stepFade);
-    });
+    }
+    document.getElementById('autoFadeBtn').addEventListener('click', triggerAutoFade);
 
     function bindDeckUI(deck, otherDeck) {
       const id = deck.id;
@@ -1851,10 +1960,51 @@
       });
     });
 
+    // Global Keyboard Shortcuts
     window.addEventListener('keydown', (e) => {
       if (e.repeat) return;
-      const idx = padPresets.findIndex((p) => p.key === e.key);
-      if (idx !== -1) triggerPad(idx);
+      if (['INPUT', 'SELECT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+
+      const k = e.key.toLowerCase();
+
+      // BEAT-IT Pads [1-8]
+      const padIdx = padPresets.findIndex((p) => p.key === e.key);
+      if (padIdx !== -1) {
+        triggerPad(padIdx);
+        return;
+      }
+
+      // Deck A Shortcuts
+      if (k === 'q') deckA.togglePlay();
+      else if (k === 'w') deckA.cue();
+      else if (k === 'e') deckA.syncTo(deckB);
+      else if (k === 'r') deckA.toggleLoop();
+
+      // Deck B Shortcuts
+      else if (k === 'u') deckB.togglePlay();
+      else if (k === 'i') deckB.cue();
+      else if (k === 'o') deckB.syncTo(deckA);
+      else if (k === 'p') deckB.toggleLoop();
+
+      // Crossfader & Mixer Shortcuts
+      else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        initAudio();
+        const xf = document.getElementById('crossfader');
+        xf.value = Math.max(0, parseFloat(xf.value) - 0.08).toFixed(2);
+        updateCrossfader();
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        initAudio();
+        const xf = document.getElementById('crossfader');
+        xf.value = Math.min(1, parseFloat(xf.value) + 0.08).toFixed(2);
+        updateCrossfader();
+      } else if (e.code === 'Space') {
+        e.preventDefault();
+        triggerAutoFade();
+      } else if (e.key === 'Escape') {
+        stopAllDecks();
+      }
     });
   </script>
 </body>
