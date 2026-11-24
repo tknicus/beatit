@@ -3,19 +3,22 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>PulseBeat DJ — Pioneer + VirtualDJ + PowerBeat Web Deck</title>
+  <meta name="theme-color" content="#0a0c10" />
+  <link rel="manifest" href="manifest.json" />
+  <title>PulseBeat DJ Pro — Pioneer + VirtualDJ + PowerBeat PWA</title>
   <style>
     :root {
-      --bg: #0a0c10;
-      --panel: #131720;
-      --panel-2: #1a202c;
-      --border: #273042;
+      --bg: #080a0e;
+      --panel: #121620;
+      --panel-2: #19202e;
+      --border: #283246;
       --text: #eef2f7;
       --muted: #8b96ab;
-      --accent-a: #00d2ff; /* Pioneer/Club Cyan */
-      --accent-b: #ff7b00; /* VirtualDJ/Warm Amber */
-      --pad: #ff2e63;      /* PowerBeat Pad Hot Pink */
+      --accent-a: #00d2ff; /* Pioneer Cyan */
+      --accent-b: #ff7b00; /* VirtualDJ Amber */
+      --pad: #ff2e63;      /* PowerBeat Hot Pink */
       --green: #00e676;
+      --yellow: #ffd54f;
     }
 
     * {
@@ -26,9 +29,9 @@
 
     body {
       margin: 0;
-      padding: 12px;
+      padding: 10px;
       font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-      background: radial-gradient(circle at top, #141b29 0%, var(--bg) 65%);
+      background: radial-gradient(circle at top, #131b2b 0%, var(--bg) 68%);
       color: var(--text);
       min-height: 100vh;
     }
@@ -42,21 +45,21 @@
       background: var(--panel);
       border: 1px solid var(--border);
       border-radius: 12px;
-      padding: 10px 16px;
-      margin-bottom: 12px;
+      padding: 10px 14px;
+      margin-bottom: 10px;
     }
 
     .brand {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
       font-weight: 800;
       letter-spacing: 0.6px;
-      font-size: 1.05rem;
+      font-size: 1rem;
     }
 
-    .brand span.badge {
-      font-size: 0.7rem;
+    .badge {
+      font-size: 0.68rem;
       font-weight: 700;
       padding: 3px 8px;
       border-radius: 999px;
@@ -65,12 +68,19 @@
       border: 1px solid rgba(0, 210, 255, 0.35);
     }
 
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
     .status-pill {
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       color: var(--muted);
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 7px;
     }
 
     .dot {
@@ -84,14 +94,23 @@
       box-shadow: 0 0 8px var(--green);
     }
 
+    .btn-install {
+      display: none;
+      background: rgba(0, 230, 118, 0.16);
+      border: 1px solid var(--green);
+      color: var(--green);
+      font-size: 0.75rem;
+      padding: 6px 10px;
+    }
+
     .console-grid {
       display: grid;
-      grid-template-columns: 1fr 270px 1fr;
-      gap: 12px;
+      grid-template-columns: 1fr 250px 1fr;
+      gap: 10px;
       align-items: stretch;
     }
 
-    @media (max-width: 1024px) {
+    @media (max-width: 1050px) {
       .console-grid {
         grid-template-columns: 1fr;
       }
@@ -101,7 +120,7 @@
       background: var(--panel);
       border: 1px solid var(--border);
       border-radius: 14px;
-      padding: 14px;
+      padding: 12px;
     }
 
     .deck-header {
@@ -109,7 +128,7 @@
       justify-content: space-between;
       align-items: center;
       gap: 8px;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
 
     .deck-title {
@@ -120,28 +139,110 @@
     .deck-a .deck-title { color: var(--accent-a); }
     .deck-b .deck-title { color: var(--accent-b); }
 
+    .bpm-readout {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      padding: 4px 9px;
+      border-radius: 8px;
+      font-size: 0.78rem;
+      font-weight: 800;
+    }
+
+    .deck-a .bpm-val { color: var(--accent-a); }
+    .deck-b .bpm-val { color: var(--accent-b); }
+
     .track-name {
-      font-size: 0.82rem;
+      font-size: 0.8rem;
       color: var(--muted);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
       background: var(--panel-2);
-      padding: 7px 10px;
+      padding: 6px 10px;
       border-radius: 8px;
       border: 1px solid var(--border);
-      margin-bottom: 12px;
+      margin-bottom: 8px;
     }
 
-    .jog-wrap {
+    /* LIVE WAVEFORM CANVAS */
+    .waveform-box {
+      position: relative;
+      background: #0b0e14;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      height: 64px;
+      margin-bottom: 10px;
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    canvas.waveform {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .time-overlay {
+      position: absolute;
+      bottom: 3px;
+      right: 6px;
+      font-size: 0.68rem;
+      font-family: monospace;
+      background: rgba(8, 10, 14, 0.78);
+      padding: 1px 5px;
+      border-radius: 4px;
+      color: var(--text);
+      pointer-events: none;
+    }
+
+    /* HOT CUES + LOOP BAR */
+    .hotcue-bar {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    .btn-hotcue {
+      padding: 7px 4px;
+      font-size: 0.72rem;
+      border-radius: 7px;
+      background: #141a26;
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
+
+    .btn-hotcue.set {
+      background: rgba(0, 210, 255, 0.18);
+      border-color: var(--accent-a);
+      color: #fff;
+    }
+
+    .deck-b .btn-hotcue.set {
+      background: rgba(255, 123, 0, 0.2);
+      border-color: var(--accent-b);
+    }
+
+    .btn-loop.active {
+      background: rgba(255, 213, 79, 0.22);
+      border-color: var(--yellow);
+      color: var(--yellow);
+    }
+
+    .jog-row {
       display: flex;
-      justify-content: center;
-      margin: 10px 0 14px;
+      align-items: center;
+      justify-content: space-around;
+      gap: 10px;
+      margin: 8px 0 12px;
     }
 
     .jog {
-      width: 170px;
-      height: 170px;
+      width: 148px;
+      height: 148px;
       border-radius: 50%;
       background: radial-gradient(circle at center, #1b2230 0%, #10141d 62%, #090b10 100%);
       border: 4px solid var(--border);
@@ -151,7 +252,8 @@
       justify-content: center;
       touch-action: none;
       cursor: grab;
-      box-shadow: inset 0 0 24px rgba(0, 0, 0, 0.75);
+      box-shadow: inset 0 0 22px rgba(0, 0, 0, 0.8);
+      flex-shrink: 0;
     }
 
     .deck-a .jog { border-color: rgba(0, 210, 255, 0.45); }
@@ -159,17 +261,17 @@
 
     .jog-marker {
       position: absolute;
-      top: 10px;
-      width: 6px;
-      height: 22px;
+      top: 8px;
+      width: 5px;
+      height: 18px;
       border-radius: 4px;
       background: var(--accent-a);
     }
     .deck-b .jog-marker { background: var(--accent-b); }
 
     .jog-center {
-      width: 58px;
-      height: 58px;
+      width: 54px;
+      height: 54px;
       border-radius: 50%;
       background: var(--panel-2);
       border: 1px solid var(--border);
@@ -177,16 +279,37 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      font-size: 0.72rem;
+      font-size: 0.68rem;
       color: var(--muted);
       pointer-events: none;
     }
 
+    .sync-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-width: 86px;
+    }
+
+    .btn-sync {
+      background: rgba(0, 230, 118, 0.14);
+      border-color: rgba(0, 230, 118, 0.5);
+      color: var(--green);
+      font-size: 0.8rem;
+      padding: 10px 8px;
+    }
+
+    .btn-reset-pitch {
+      font-size: 0.7rem;
+      padding: 6px;
+      color: var(--muted);
+    }
+
     .transport {
       display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 8px;
-      margin-bottom: 12px;
+      grid-template-columns: 1.3fr 1fr 1fr;
+      gap: 7px;
+      margin-bottom: 10px;
     }
 
     button {
@@ -195,9 +318,9 @@
       background: var(--panel-2);
       color: var(--text);
       border-radius: 9px;
-      padding: 9px 10px;
+      padding: 9px 8px;
       font-weight: 700;
-      font-size: 0.82rem;
+      font-size: 0.8rem;
       cursor: pointer;
       transition: transform 0.05s ease, background 0.15s ease;
     }
@@ -207,31 +330,31 @@
     }
 
     .btn-play.playing {
-      background: rgba(0, 230, 118, 0.2);
+      background: rgba(0, 230, 118, 0.22);
       border-color: var(--green);
       color: var(--green);
     }
 
     .btn-cue {
       border-color: rgba(255, 193, 7, 0.5);
-      color: #ffd54f;
+      color: var(--yellow);
     }
 
     .btn-load {
-      padding: 6px 10px;
-      font-size: 0.76rem;
+      padding: 5px 9px;
+      font-size: 0.74rem;
     }
 
     .control-row {
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
 
     .control-label {
       display: flex;
       justify-content: space-between;
-      font-size: 0.75rem;
+      font-size: 0.73rem;
       color: var(--muted);
-      margin-bottom: 4px;
+      margin-bottom: 3px;
     }
 
     input[type="range"] {
@@ -248,8 +371,8 @@
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 8px;
-      margin-top: 8px;
-      padding-top: 8px;
+      margin-top: 6px;
+      padding-top: 6px;
       border-top: 1px solid var(--border);
     }
 
@@ -257,18 +380,18 @@
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      gap: 12px;
+      gap: 10px;
     }
 
     .mixer-title {
       text-align: center;
       font-weight: 800;
-      font-size: 0.9rem;
+      font-size: 0.86rem;
       letter-spacing: 1px;
       color: var(--muted);
     }
 
-    .meter-box {
+    .meter-box, .crossfader-box {
       background: var(--panel-2);
       border: 1px solid var(--border);
       border-radius: 10px;
@@ -277,7 +400,7 @@
 
     .meter-bar-bg {
       height: 12px;
-      background: #0c0f15;
+      background: #0b0e14;
       border-radius: 6px;
       overflow: hidden;
       margin-top: 6px;
@@ -288,13 +411,6 @@
       width: 0%;
       background: linear-gradient(90deg, var(--green), #ffea00, #ff1744);
       transition: width 0.04s linear;
-    }
-
-    .crossfader-box {
-      background: var(--panel-2);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 12px;
     }
 
     .crossfader-labels {
@@ -308,21 +424,21 @@
     .crossfader-labels span:last-child { color: var(--accent-b); }
 
     .sampler-box {
-      margin-top: 12px;
+      margin-top: 10px;
     }
 
     .sampler-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
       flex-wrap: wrap;
       gap: 8px;
     }
 
     .sampler-title {
       font-weight: 800;
-      font-size: 0.92rem;
+      font-size: 0.9rem;
       color: var(--pad);
       letter-spacing: 0.8px;
     }
@@ -330,7 +446,7 @@
     .pads-grid {
       display: grid;
       grid-template-columns: repeat(6, 1fr);
-      gap: 10px;
+      gap: 8px;
     }
 
     @media (max-width: 768px) {
@@ -343,19 +459,19 @@
       background: var(--panel-2);
       border: 1px solid var(--border);
       border-radius: 12px;
-      padding: 10px;
+      padding: 8px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      gap: 8px;
+      gap: 6px;
     }
 
     .pad-trigger {
-      min-height: 68px;
+      min-height: 60px;
       background: rgba(255, 46, 99, 0.14);
       border: 1px solid rgba(255, 46, 99, 0.45);
       color: #fff;
-      font-size: 0.85rem;
+      font-size: 0.82rem;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -365,7 +481,6 @@
 
     .pad-trigger.hit {
       background: var(--pad);
-      color: #fff;
       transform: scale(0.97);
     }
 
@@ -373,13 +488,13 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 0.7rem;
+      font-size: 0.68rem;
       color: var(--muted);
     }
 
     .pad-upload-btn {
-      padding: 4px 7px;
-      font-size: 0.7rem;
+      padding: 3px 6px;
+      font-size: 0.68rem;
       border-radius: 6px;
     }
 
@@ -391,12 +506,15 @@
 <body>
   <div class="topbar">
     <div class="brand">
-      <span>PULSEBEAT DJ</span>
-      <span class="badge">PIONEER + VIRTUALDJ + POWERBEAT</span>
+      <span>PULSEBEAT DJ PRO</span>
+      <span class="badge">OFFLINE PWA V2</span>
     </div>
-    <div class="status-pill">
-      <span id="audioDot" class="dot"></span>
-      <span id="audioStatus">Tap any control to unlock Audio Engine</span>
+    <div class="topbar-right">
+      <button id="installBtn" class="btn-install">Install App</button>
+      <div class="status-pill">
+        <span id="audioDot" class="dot"></span>
+        <span id="audioStatus">Tap any control to start Audio Engine</span>
+      </div>
     </div>
   </div>
 
@@ -405,18 +523,40 @@
     <section class="deck deck-a" id="deckA">
       <div class="deck-header">
         <span class="deck-title">DECK A</span>
+        <div class="bpm-readout">
+          <span>BPM:</span>
+          <span class="bpm-val" id="bpmDispA">--.-</span>
+        </div>
         <button class="btn-load" onclick="document.getElementById('fileA').click()">Load Track</button>
         <input type="file" id="fileA" class="hidden-file" accept="audio/*" />
       </div>
+
       <div class="track-name" id="nameA">No track loaded — tap Load Track</div>
 
-      <div class="jog-wrap">
+      <div class="waveform-box" id="waveBoxA" title="Click/Tap to jump position">
+        <canvas class="waveform" id="waveA"></canvas>
+        <span class="time-overlay" id="timeA">00:00 / 00:00</span>
+      </div>
+
+      <div class="hotcue-bar">
+        <button class="btn-hotcue" id="hcA0" title="Tap to set/jump, Hold to clear">HC 1</button>
+        <button class="btn-hotcue" id="hcA1" title="Tap to set/jump, Hold to clear">HC 2</button>
+        <button class="btn-hotcue" id="hcA2" title="Tap to set/jump, Hold to clear">HC 3</button>
+        <button class="btn-hotcue" id="hcA3" title="Tap to set/jump, Hold to clear">HC 4</button>
+        <button class="btn-loop" id="loopA">LOOP 4B</button>
+      </div>
+
+      <div class="jog-row">
         <div class="jog" id="jogA">
           <div class="jog-marker"></div>
           <div class="jog-center">
             <strong>DECK A</strong>
             <span id="rateDispA">100%</span>
           </div>
+        </div>
+        <div class="sync-stack">
+          <button class="btn-sync" id="syncA">SYNC TO B</button>
+          <button class="btn-reset-pitch" id="resetPitchA">Reset 0%</button>
         </div>
       </div>
 
@@ -428,7 +568,7 @@
 
       <div class="control-row">
         <div class="control-label">
-          <span>Deck Volume</span>
+          <span>Channel Fader</span>
           <span id="volValA">85%</span>
         </div>
         <input type="range" id="volA" min="0" max="1" step="0.01" value="0.85" />
@@ -439,7 +579,7 @@
           <span>Tempo / Pitch</span>
           <span id="tempoValA">0.0%</span>
         </div>
-        <input type="range" id="tempoA" min="0.8" max="1.25" step="0.005" value="1" />
+        <input type="range" id="tempoA" min="0.75" max="1.25" step="0.002" value="1" />
       </div>
 
       <div class="eq-grid">
@@ -464,7 +604,7 @@
 
       <div class="meter-box">
         <div class="control-label">
-          <span>Master Output Level</span>
+          <span>Master Output</span>
           <span id="meterDb">-∞ dB</span>
         </div>
         <div class="meter-bar-bg">
@@ -489,8 +629,12 @@
         <input type="range" id="crossfader" min="0" max="1" step="0.01" value="0.5" />
       </div>
 
-      <div style="font-size: 0.72rem; color: var(--muted); line-height: 1.4;">
-        <strong>Shortcuts:</strong> Keys <code>1–6</code> trigger PowerBeat Pads. Equal-power crossfade keeps volume steady at center.
+      <div style="font-size: 0.72rem; color: var(--muted); line-height: 1.45;">
+        <strong>Pro Tips:</strong><br/>
+        • Tap <strong>Waveform</strong> to scrub.<br/>
+        • Tap <strong>HC 1–4</strong> to set/jump; <strong>Long-press</strong> to clear.<br/>
+        • <strong>SYNC</strong> matches Deck BPM automatically.<br/>
+        • Keys <code>1–6</code> fire Sampler Pads.
       </div>
     </section>
 
@@ -498,18 +642,40 @@
     <section class="deck deck-b" id="deckB">
       <div class="deck-header">
         <span class="deck-title">DECK B</span>
+        <div class="bpm-readout">
+          <span>BPM:</span>
+          <span class="bpm-val" id="bpmDispB">--.-</span>
+        </div>
         <button class="btn-load" onclick="document.getElementById('fileB').click()">Load Track</button>
         <input type="file" id="fileB" class="hidden-file" accept="audio/*" />
       </div>
+
       <div class="track-name" id="nameB">No track loaded — tap Load Track</div>
 
-      <div class="jog-wrap">
+      <div class="waveform-box" id="waveBoxB" title="Click/Tap to jump position">
+        <canvas class="waveform" id="waveB"></canvas>
+        <span class="time-overlay" id="timeB">00:00 / 00:00</span>
+      </div>
+
+      <div class="hotcue-bar">
+        <button class="btn-hotcue" id="hcB0" title="Tap to set/jump, Hold to clear">HC 1</button>
+        <button class="btn-hotcue" id="hcB1" title="Tap to set/jump, Hold to clear">HC 2</button>
+        <button class="btn-hotcue" id="hcB2" title="Tap to set/jump, Hold to clear">HC 3</button>
+        <button class="btn-hotcue" id="hcB3" title="Tap to set/jump, Hold to clear">HC 4</button>
+        <button class="btn-loop" id="loopB">LOOP 4B</button>
+      </div>
+
+      <div class="jog-row">
         <div class="jog" id="jogB">
           <div class="jog-marker"></div>
           <div class="jog-center">
             <strong>DECK B</strong>
             <span id="rateDispB">100%</span>
           </div>
+        </div>
+        <div class="sync-stack">
+          <button class="btn-sync" id="syncB">SYNC TO A</button>
+          <button class="btn-reset-pitch" id="resetPitchB">Reset 0%</button>
         </div>
       </div>
 
@@ -521,7 +687,7 @@
 
       <div class="control-row">
         <div class="control-label">
-          <span>Deck Volume</span>
+          <span>Channel Fader</span>
           <span id="volValB">85%</span>
         </div>
         <input type="range" id="volB" min="0" max="1" step="0.01" value="0.85" />
@@ -532,7 +698,7 @@
           <span>Tempo / Pitch</span>
           <span id="tempoValB">0.0%</span>
         </div>
-        <input type="range" id="tempoB" min="0.8" max="1.25" step="0.005" value="1" />
+        <input type="range" id="tempoB" min="0.75" max="1.25" step="0.002" value="1" />
       </div>
 
       <div class="eq-grid">
@@ -556,12 +722,35 @@
   <section class="sampler-box">
     <div class="sampler-header">
       <span class="sampler-title">POWERBEAT SAMPLER PADS</span>
-      <span style="font-size: 0.75rem; color: var(--muted);">Built-in synth SFX active — load custom WAV/MP3 per pad anytime</span>
+      <span style="font-size: 0.74rem; color: var(--muted);">Zero-latency synth SFX ready — load custom WAV/MP3 anytime</span>
     </div>
     <div class="pads-grid" id="padsGrid"></div>
   </section>
 
   <script>
+    // Register Offline Service Worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(() => {});
+      });
+    }
+
+    // PWA Install Prompt handler
+    let deferredPrompt = null;
+    const installBtn = document.getElementById('installBtn');
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      installBtn.style.display = 'inline-block';
+    });
+    installBtn.addEventListener('click', async () => {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      await deferredPrompt.userChoice;
+      deferredPrompt = null;
+      installBtn.style.display = 'none';
+    });
+
     let ctx = null;
     let masterGain = null;
     let analyser = null;
@@ -584,26 +773,107 @@
         ctx.resume();
       }
       document.getElementById('audioDot').classList.add('active');
-      document.getElementById('audioStatus').textContent = 'Web Audio Engine Ready';
+      document.getElementById('audioStatus').textContent = 'Engine Active (Offline Ready)';
+    }
+
+    // Fast Auto-BPM Estimator via Peak Interval Histogram
+    function estimateBPM(audioBuffer) {
+      try {
+        const channel = audioBuffer.getChannelData(0);
+        const sampleRate = audioBuffer.sampleRate;
+        // Analyze middle 30 seconds for accurate tempo
+        const startSample = Math.min(channel.length - 1, Math.floor(sampleRate * 15));
+        const maxSamples = Math.min(channel.length - startSample, Math.floor(sampleRate * 30));
+        if (maxSamples < sampleRate * 4) return 120.0;
+
+        // Downsample energy envelopes in ~10ms windows
+        const step = Math.floor(sampleRate / 100);
+        const energies = [];
+        for (let i = startSample; i < startSample + maxSamples; i += step) {
+          let sum = 0;
+          for (let j = 0; j < step && i + j < channel.length; j++) {
+            const v = channel[i + j];
+            sum += v * v;
+          }
+          energies.push(Math.sqrt(sum / step));
+        }
+
+        // Find local peaks above adaptive threshold
+        const peaks = [];
+        const win = 15;
+        for (let i = win; i < energies.length - win; i++) {
+          let localAvg = 0;
+          for (let k = -win; k <= win; k++) localAvg += energies[i + k];
+          localAvg /= (win * 2 + 1);
+
+          if (energies[i] > localAvg * 1.35 && energies[i] > energies[i - 1] && energies[i] >= energies[i + 1]) {
+            if (peaks.length === 0 || i - peaks[peaks.length - 1] > 25) {
+              peaks.push(i);
+            }
+          }
+        }
+
+        // Count intervals into BPM bins (75 - 165 BPM)
+        const histogram = {};
+        for (let i = 0; i < peaks.length; i++) {
+          for (let j = i + 1; j < Math.min(i + 8, peaks.length); j++) {
+            const dtSec = (peaks[j] - peaks[i]) * 0.01;
+            let bpm = 60 / dtSec;
+            while (bpm < 78) bpm *= 2;
+            while (bpm > 162) bpm /= 2;
+            const rounded = Math.round(bpm);
+            histogram[rounded] = (histogram[rounded] || 0) + 1;
+          }
+        }
+
+        let bestBpm = 120;
+        let maxCount = 0;
+        for (const [bpmStr, count] of Object.entries(histogram)) {
+          if (count > maxCount) {
+            maxCount = count;
+            bestBpm = parseFloat(bpmStr);
+          }
+        }
+        return bestBpm;
+      } catch (e) {
+        return 120.0;
+      }
+    }
+
+    function formatTime(sec) {
+      if (!isFinite(sec) || sec < 0) return '00:00';
+      const m = Math.floor(sec / 60);
+      const s = Math.floor(sec % 60);
+      return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
     }
 
     class Deck {
-      constructor(id) {
+      constructor(id, colorHex) {
         this.id = id;
+        this.colorHex = colorHex;
         this.audio = new Audio();
         this.audio.crossOrigin = 'anonymous';
-        this.audio.loop = false;
         this.cueTime = 0;
         this.angle = 0;
         this.draggingJog = false;
         this.lastPointerX = 0;
         this.sourceConnected = false;
 
+        this.baseBPM = null;
+        this.peaks = [];
+        this.hotCues = [null, null, null, null];
+        this.loopActive = false;
+        this.loopStart = 0;
+        this.loopEnd = 0;
+
         this.deckGain = null;
         this.xfadeGain = null;
         this.lowEQ = null;
         this.midEQ = null;
         this.highEQ = null;
+
+        this.canvas = document.getElementById(`wave${id}`);
+        this.cctx = this.canvas.getContext('2d');
       }
 
       ensureGraph() {
@@ -639,13 +909,173 @@
         updateCrossfader();
       }
 
-      loadFile(file) {
+      async loadFile(file) {
         if (!file) return;
         this.ensureGraph();
         const url = URL.createObjectURL(file);
         this.audio.src = url;
         this.cueTime = 0;
+        this.hotCues = [null, null, null, null];
+        this.loopActive = false;
+        document.getElementById(`loop${this.id}`).classList.remove('active');
+        this.updateHotCueButtons();
+
         document.getElementById(`name${this.id}`).textContent = file.name;
+        document.getElementById(`bpmDisp${this.id}`).textContent = 'SCAN...';
+
+        // Decode audio for waveform + BPM
+        try {
+          const arrayBuffer = await file.arrayBuffer();
+          const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
+          this.baseBPM = estimateBPM(audioBuffer);
+          this.buildWaveformPeaks(audioBuffer, 260);
+          this.syncControls();
+        } catch (err) {
+          this.baseBPM = 120;
+          this.peaks = [];
+          this.syncControls();
+        }
+      }
+
+      buildWaveformPeaks(audioBuffer, bucketCount) {
+        const data = audioBuffer.getChannelData(0);
+        const blockSize = Math.floor(data.length / bucketCount);
+        const peaks = [];
+        for (let i = 0; i < bucketCount; i++) {
+          let max = 0;
+          const start = i * blockSize;
+          for (let j = 0; j < blockSize; j += 16) {
+            const val = Math.abs(data[start + j] || 0);
+            if (val > max) max = val;
+          }
+          peaks.push(max);
+        }
+        this.peaks = peaks;
+      }
+
+      drawWaveform() {
+        const rect = this.canvas.getBoundingClientRect();
+        if (this.canvas.width !== Math.floor(rect.width) || this.canvas.height !== Math.floor(rect.height)) {
+          this.canvas.width = Math.max(100, Math.floor(rect.width));
+          this.canvas.height = Math.max(40, Math.floor(rect.height));
+        }
+        const w = this.canvas.width;
+        const h = this.canvas.height;
+        const c = this.cctx;
+        c.clearRect(0, 0, w, h);
+
+        const duration = this.audio.duration || 0;
+        const current = this.audio.currentTime || 0;
+        const progress = duration > 0 ? current / duration : 0;
+
+        // Draw waveform bars
+        if (this.peaks.length > 0) {
+          const barW = w / this.peaks.length;
+          for (let i = 0; i < this.peaks.length; i++) {
+            const x = i * barW;
+            const barH = Math.max(3, this.peaks[i] * (h * 0.85));
+            const y = (h - barH) / 2;
+            const played = i / this.peaks.length <= progress;
+            c.fillStyle = played ? this.colorHex : '#2a3548';
+            c.fillRect(x, y, Math.max(1, barW - 0.8), barH);
+          }
+        } else {
+          c.fillStyle = '#1b2230';
+          c.fillRect(0, h / 2 - 1, w, 2);
+        }
+
+        // Draw Loop Region
+        if (this.loopActive && duration > 0) {
+          const lx1 = (this.loopStart / duration) * w;
+          const lx2 = (this.loopEnd / duration) * w;
+          c.fillStyle = 'rgba(255, 213, 79, 0.25)';
+          c.fillRect(lx1, 0, Math.max(4, lx2 - lx1), h);
+        }
+
+        // Draw Hot Cue Markers
+        if (duration > 0) {
+          this.hotCues.forEach((hcTime, idx) => {
+            if (hcTime !== null) {
+              const hx = (hcTime / duration) * w;
+              c.fillStyle = '#00e676';
+              c.fillRect(hx - 1, 0, 2, h);
+              c.font = 'bold 9px sans-serif';
+              c.fillText(`${idx + 1}`, hx + 3, 10);
+            }
+          });
+        }
+
+        // Draw Playhead Needle
+        if (duration > 0) {
+          const px = progress * w;
+          c.fillStyle = '#ffffff';
+          c.fillRect(px - 1, 0, 2, h);
+        }
+
+        document.getElementById(`time${this.id}`).textContent = `${formatTime(current)} / ${formatTime(duration)}`;
+      }
+
+      handleHotCue(index) {
+        this.ensureGraph();
+        if (!this.audio.src) return;
+        if (this.hotCues[index] === null) {
+          this.hotCues[index] = this.audio.currentTime;
+        } else {
+          this.audio.currentTime = this.hotCues[index];
+          if (this.audio.paused) this.togglePlay();
+        }
+        this.updateHotCueButtons();
+      }
+
+      clearHotCue(index) {
+        this.hotCues[index] = null;
+        this.updateHotCueButtons();
+      }
+
+      updateHotCueButtons() {
+        this.hotCues.forEach((val, idx) => {
+          const btn = document.getElementById(`hc${this.id}${idx}`);
+          if (val !== null) {
+            btn.classList.add('set');
+            btn.textContent = `HC ${idx + 1} •`;
+          } else {
+            btn.classList.remove('set');
+            btn.textContent = `HC ${idx + 1}`;
+          }
+        });
+      }
+
+      toggleLoop() {
+        this.ensureGraph();
+        if (!this.audio.src) return;
+        const btn = document.getElementById(`loop${this.id}`);
+        if (!this.loopActive) {
+          const bpm = this.getEffectiveBPM() || 120;
+          const fourBeatsSec = (60 / bpm) * 4;
+          this.loopStart = this.audio.currentTime;
+          this.loopEnd = Math.min(this.audio.duration || this.loopStart + fourBeatsSec, this.loopStart + fourBeatsSec);
+          this.loopActive = true;
+          btn.classList.add('active');
+        } else {
+          this.loopActive = false;
+          btn.classList.remove('active');
+        }
+      }
+
+      getEffectiveBPM() {
+        if (!this.baseBPM) return null;
+        const tempo = parseFloat(document.getElementById(`tempo${this.id}`).value);
+        return this.baseBPM * tempo;
+      }
+
+      syncTo(otherDeck) {
+        this.ensureGraph();
+        const targetBpm = otherDeck.getEffectiveBPM();
+        if (!this.baseBPM || !targetBpm) return;
+        let neededRate = targetBpm / this.baseBPM;
+        neededRate = Math.max(0.75, Math.min(1.25, neededRate));
+        document.getElementById(`tempo${this.id}`).value = neededRate.toFixed(3);
+        this.syncControls();
       }
 
       togglePlay() {
@@ -702,26 +1132,67 @@
         document.getElementById(`hiVal${this.id}`).textContent = `${hi}dB`;
         document.getElementById(`midVal${this.id}`).textContent = `${mid}dB`;
         document.getElementById(`lowVal${this.id}`).textContent = `${low}dB`;
+
+        const effBpm = this.getEffectiveBPM();
+        document.getElementById(`bpmDisp${this.id}`).textContent = effBpm ? effBpm.toFixed(1) : '--.-';
       }
     }
 
-    const deckA = new Deck('A');
-    const deckB = new Deck('B');
+    const deckA = new Deck('A', '#00d2ff');
+    const deckB = new Deck('B', '#ff7b00');
 
     function updateCrossfader() {
-      const x = parseFloat(document.getElementById('crossfader').value); // 0 = A, 1 = B
+      const x = parseFloat(document.getElementById('crossfader').value);
       const gainA = Math.cos(x * 0.5 * Math.PI);
       const gainB = Math.cos((1 - x) * 0.5 * Math.PI);
       if (deckA.xfadeGain) deckA.xfadeGain.gain.value = gainA;
       if (deckB.xfadeGain) deckB.xfadeGain.gain.value = gainB;
     }
 
-    function bindDeckUI(deck) {
+    function bindDeckUI(deck, otherDeck) {
       const id = deck.id;
       document.getElementById(`file${id}`).addEventListener('change', (e) => deck.loadFile(e.target.files[0]));
       document.getElementById(`play${id}`).addEventListener('click', () => deck.togglePlay());
       document.getElementById(`cue${id}`).addEventListener('click', () => deck.cue());
       document.getElementById(`stop${id}`).addEventListener('click', () => deck.stop());
+      document.getElementById(`sync${id}`).addEventListener('click', () => deck.syncTo(otherDeck));
+      document.getElementById(`loop${id}`).addEventListener('click', () => deck.toggleLoop());
+
+      document.getElementById(`resetPitch${id}`).addEventListener('click', () => {
+        document.getElementById(`tempo${id}`).value = 1;
+        deck.syncControls();
+      });
+
+      // Waveform click/tap seek
+      document.getElementById(`waveBox${id}`).addEventListener('click', (e) => {
+        deck.ensureGraph();
+        if (!deck.audio.duration) return;
+        const rect = e.currentTarget.getBoundingClientRect();
+        const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+        deck.audio.currentTime = ratio * deck.audio.duration;
+      });
+
+      // Hot Cues (Tap to set/jump, Long-press or Right-click to clear)
+      [0, 1, 2, 3].forEach((hcIdx) => {
+        const btn = document.getElementById(`hc${id}${hcIdx}`);
+        let pressTimer = null;
+        btn.addEventListener('pointerdown', () => {
+          pressTimer = setTimeout(() => {
+            deck.clearHotCue(hcIdx);
+            pressTimer = 'cleared';
+          }, 550);
+        });
+        btn.addEventListener('pointerup', () => {
+          if (pressTimer !== 'cleared') {
+            clearTimeout(pressTimer);
+            deck.handleHotCue(hcIdx);
+          }
+        });
+        btn.addEventListener('contextmenu', (e) => {
+          e.preventDefault();
+          deck.clearHotCue(hcIdx);
+        });
+      });
 
       ['vol', 'tempo', 'hi', 'mid', 'low'].forEach((param) => {
         document.getElementById(`${param}${id}`).addEventListener('input', () => {
@@ -730,6 +1201,7 @@
         });
       });
 
+      // Jog wheel drag
       const jog = document.getElementById(`jog${id}`);
       const onDown = (clientX) => {
         deck.ensureGraph();
@@ -761,8 +1233,8 @@
       window.addEventListener('touchend', onUp);
     }
 
-    bindDeckUI(deckA);
-    bindDeckUI(deckB);
+    bindDeckUI(deckA, deckB);
+    bindDeckUI(deckB, deckA);
 
     document.getElementById('crossfader').addEventListener('input', () => {
       initAudio();
@@ -776,17 +1248,21 @@
       document.getElementById('masterVal').textContent = `${Math.round(v * 100)}%`;
     });
 
-    // Spin jogs while playing
-    function animatePlatters() {
+    // Main visual & loop frame
+    function renderLoop() {
       [deckA, deckB].forEach((d) => {
         if (!d.audio.paused && !d.draggingJog) {
           d.angle = (d.angle + 1.8 * d.audio.playbackRate) % 360;
           document.getElementById(`jog${d.id}`).style.transform = `rotate(${d.angle}deg)`;
         }
+        if (d.loopActive && d.audio.currentTime >= d.loopEnd) {
+          d.audio.currentTime = d.loopStart;
+        }
+        d.drawWaveform();
       });
-      requestAnimationFrame(animatePlatters);
+      requestAnimationFrame(renderLoop);
     }
-    requestAnimationFrame(animatePlatters);
+    requestAnimationFrame(renderLoop);
 
     // Master VU meter loop
     function startMeterLoop() {
@@ -814,7 +1290,7 @@
       tick();
     }
 
-    // PowerBeat Sampler Pads (6 pads with built-in Web Audio synth fallback + custom file support)
+    // PowerBeat Sampler Pads
     const padPresets = [
       { label: 'SUB DROP', type: 'sub', key: '1' },
       { label: 'LASER ZAP', type: 'laser', key: '2' },
@@ -931,9 +1407,7 @@
     window.addEventListener('keydown', (e) => {
       if (e.repeat) return;
       const idx = padPresets.findIndex((p) => p.key === e.key);
-      if (idx !== -1) {
-        triggerPad(idx);
-      }
+      if (idx !== -1) triggerPad(idx);
     });
   </script>
 </body>
